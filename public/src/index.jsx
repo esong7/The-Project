@@ -9,7 +9,7 @@ import Login from './components/Login.jsx';
 import PrivateRoute from './components/PrivateRoute.jsx';
 import Util from './lib/util.js';
 import CreateItem from './components/CreateItem.jsx';
-
+import $ from 'jquery';
 
 class App extends React.Component {
   constructor(props) {
@@ -18,7 +18,7 @@ class App extends React.Component {
       isAuthenticated: false,
       tripName: '',
       tripDesc: '',
-      items:[],
+      items: [],
       name:'',
       amount: 0
     }
@@ -29,6 +29,23 @@ class App extends React.Component {
     this.onPriceChange = this.onPriceChange.bind(this);
     this.handleTripNameSubmit = this.handleTripNameSubmit.bind(this);
     this.handleTripNameChange = this.handleTripNameChange.bind(this);
+    this.onGVision = this.onGVision.bind(this);
+  }
+
+  callGVision() {
+    let data = 'Hello';
+    let currentScope = this;
+    $.ajax({
+      type: 'POST',
+      url: '/upload',
+      data: data,
+      success: (results) => {
+        console.log('.as.d.awd.as.data', results);
+        console.log('this is ssss:', this, '....', currentScope);
+        this.onGVision(results);
+        console.log('Successfully sent post to /vision, resulting array:', this.state.items);
+      },
+    });
   }
 
   verifyAuthentication(isAuthenticated) {
@@ -42,16 +59,24 @@ class App extends React.Component {
     Util.logout(this.verifyAuthentication);
   }
 
-  addItem (itemArray){
+  addItem (itemArray) {
     this.setState({
       items: this.state.items.concat([[this.state.name, this.state.amount]])
-    })
+    });
   }
-
+  onGVision(itemizationObject) {
+    //{item: price, item: price}
+    let itemArray = [];
+    for (key in itemizationObject) {
+      itemArray.push([key, itemizationObject[key]]);
+    }
+    this.setState({items: itemArray});
+    console.log('Successfully sent post to /vision, resulting array:', this.state.items);
+  }
   onNameChange(event) {
     this.setState({
       name: event.target.value
-    })
+    });
   }
 
   onPriceChange(event) {
@@ -106,6 +131,7 @@ class App extends React.Component {
               component={UploadReceipt}
               tripName={this.state.tripName}
               tripDesc={this.state.tripDesc}
+              callGVision={this.callGVision}
             />
             <PrivateRoute path="/additems" isAuthenticated={this.state.isAuthenticated} component={CreateItem}
               addItem={this.addItem}

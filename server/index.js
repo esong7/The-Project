@@ -19,11 +19,6 @@ const gVision = require('./api/vision.js');
 //
 var localStorage = {};
 
-const Promise = require('bluebird');
-const fs = Promise.promisifyAll(require('fs'));
-//Google cloud vision setup:
-const gVision = require('./api/vision.js');
-
 
 app.use( bodyParser.json() );
 app.use(cors());
@@ -171,15 +166,26 @@ app.post('/upload', function(req, res) {
     if (err) {
       return res.status(500).send(err);
     }
-    cloudinary.uploader.upload(__dirname + '/temp/filename.jpg', function(results) {
-      var params = [1, 1, 1, 'cat', results.url, 150, 10, 15];
-      db.addReceipt(params, function(err, data) {
-        console.log(data);
-        res.send('File uploaded!');
+    let image = __dirname + '/temp/filename.jpg'; 
+    gVision.promisifiedDetectText(image)
+    .then(function(results) {
+      let allItems = results[0];
+      cloudinary.uploader.upload(__dirname + '/temp/filename.jpg', function(results) {
+      // var params = [1, 1, 1, 'cat', results.url, 150, 10, 15];
+      // db.addReceipt(params, function(err, data) {
+      //   console.log(data);
+      //   res.send('File uploaded!');
+      // });
       });
+      fs.writeFileAsync('server/api/testResults/testFile.js', JSON.stringify(gVision.spliceReceipt(allItems.split('\n'))));
+      console.log('res.sending receipt itemization object:', JSON.stringify(gVision.spliceReceipt(allItems.split('\n'))));
+      res.send(gVision.spliceReceipt(allItems.split('\n')));
+      // console.log('Successfully created /test.js with:', gVision.spliceReceipt(allItems.split('\n')));
+    })
+    .error(function(e) {
+      console.log('Error received in appPost, promisifiedDetectText:', e);
     });
   });
-
 });
 
 app.post('/upload/delete', function(req, res) {

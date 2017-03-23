@@ -6,6 +6,7 @@ class UploadReceipt extends React.Component {
   constructor(props) {
     super(props);
   }
+//this.props.callGVision
 
   render() {
 
@@ -17,7 +18,8 @@ class UploadReceipt extends React.Component {
           id='uploadForm'
           action='http://localhost:3000/upload'
           method='post'
-          encType="multipart/form-data">
+          encType="multipart/form-data"
+          onSubmit={this.props.callGVision}>
             <input type="file" name="sampleFile" />
             <input type='submit' value='Upload!' />
         </form>
