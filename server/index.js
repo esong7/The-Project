@@ -151,10 +151,14 @@ app.post('/createTripName', function(req, res) {
   res.redirect('/upload-receipt');
 });
 
+let uploadCloud = () => {
+  cloudinary.uploader.upload(__dirname + '/temp/filename.jpg', function(data) {
+  });
+};
 app.post('/upload', function(req, res) {
   //req.body should include receipt name, total, receipt_link;
   //should be an insert query
-  console.log('body',req.body)
+  console.log('body', req.body);
   if (!req.files) {
     return res.status(400).send('No files were uploaded.');
   }
@@ -184,26 +188,16 @@ app.post('/upload/delete', function(req, res) {
   //should be a delete query
 });
 
-let uploadCloud = () => {
-  cloudinary.uploader.upload(__dirname + '/temp/filename.jpg', function(data) {
-      // var params = [1, 1, 1, 'cat', results.url, 150, 10, 15];
-      // db.addReceipt(params, function(err, data) {
-      //   console.log(data);
-      //   res.send('File uploaded!');
-      // });
-      console.log('+++++++++',data);
-  });
-}
 
 //gVision.spliceReceipt produces an object of item : price pairs
 app.post('/vision', function(req, res) {
-  let image = req.body.receipt || __dirname + '/api/testReceipts/test3.jpg'; 
+  let image = req.body.receipt || __dirname + '/api/testReceipts/test9.jpg'; 
   gVision.promisifiedDetectText(image)
   .then(function(results) {
     let allItems = results[0];
-    fs.writeFileAsync('server/api/testResults/test3.js', JSON.stringify(gVision.spliceReceipt(allItems.split('\n'))));
+    fs.writeFileAsync('server/api/testResults/test9.js', JSON.stringify(gVision.spliceReceipt(allItems.split('\n'))));
+    console.log('Successfully created /test.js with:', results);
     res.send(gVision.spliceReceipt(allItems.split('\n')));
-    // console.log('Successfully created /test.js with:', gVision.spliceReceipt(allItems.split('\n')));
   })
   .error(function(e) {
     console.log('Error received in appPost, promisifiedDetectText:', e);
